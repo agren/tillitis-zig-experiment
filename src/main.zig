@@ -2,6 +2,12 @@ const std = @import("std");
 const mmio = @import("tk1_mmio.zig");
 
 pub export fn main() void {
+    mmio.qemu.puts("Running on: '");
+    mmio.qemu.puts(&mmio.tk1.name());
+    mmio.qemu.puts("', version: 0x");
+    mmio.qemu.puthexu32(mmio.tk1.VERSION);
+    mmio.qemu.puts(".\n");
+
     mmio.timer.stop();
     mmio.timer.PRESCALER = 18000000; // 18000000: 1 sec/tick
 

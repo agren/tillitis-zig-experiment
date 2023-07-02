@@ -3,8 +3,10 @@ const MMIO_BASE       = 0xc0000000;
 const MMIO_TRNG_BASE  = MMIO_BASE;
 const MMIO_QEMU_BASE  = MMIO_BASE | 0x3e000000;
 const MMIO_TIMER_BASE = MMIO_BASE | 0x01000000;
+const MMIO_TK1_BASE   = MMIO_BASE | 0x3f000000;
 // zig fmt: on
 
+pub const tk1 = map_device_struct(Tk1, MMIO_TK1_BASE);
 pub const trng = map_device_struct(Trng, MMIO_TRNG_BASE);
 pub const timer = map_device_struct(Timer, MMIO_TIMER_BASE);
 pub const qemu = map_device_struct(QEmu, MMIO_QEMU_BASE);
@@ -12,6 +14,25 @@ pub const qemu = map_device_struct(QEmu, MMIO_QEMU_BASE);
 fn map_device_struct(comptime T: type, base_address: u32) *volatile T {
     return @intToPtr(*volatile T, base_address);
 }
+
+const Tk1 = packed struct {
+    NAME0: u32,
+    NAME1: u32,
+    VERSION: u32,
+
+    pub fn name(self: *volatile Tk1) [8]u8 {
+        return .{
+            @truncate(u8, self.NAME0 >> 24),
+            @truncate(u8, self.NAME0 >> 16),
+            @truncate(u8, self.NAME0 >> 8),
+            @truncate(u8, self.NAME0),
+            @truncate(u8, self.NAME1 >> 24),
+            @truncate(u8, self.NAME1 >> 16),
+            @truncate(u8, self.NAME1 >> 8),
+            @truncate(u8, self.NAME1),
+        };
+    }
+};
 
 const Trng = packed struct {
     _unused_0: u288,
