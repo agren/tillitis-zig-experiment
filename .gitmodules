@@ -1,0 +1,3 @@
+[submodule "lib/tkey-libs"]
+	path = lib/tkey-libs
+	url = git@github.com:tillitis/tkey-libs.git

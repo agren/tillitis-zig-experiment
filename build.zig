@@ -1,19 +1,32 @@
 const std = @import("std");
+const featureSet = std.Target.riscv.featureSet;
+const RiscVFeature = std.Target.riscv.Feature;
 
 pub fn build(b: *std.build.Builder) void {
     // Standard target options allows the person running `zig build` to choose
     // what target to build for. Here we do not override the defaults, which
     // means any target is allowed, and the default is native. Other options
     // for restricting supported target set are available.
-    const target = b.standardTargetOptions(.{});
+    const target: std.zig.CrossTarget = .{
+        .cpu_arch = .riscv32,
+        .cpu_model = .{ .explicit = &std.Target.riscv.cpu.generic_rv32 },
+        .cpu_features_add = featureSet(&[_]RiscVFeature{
+            .c,
+            .zmmul,
+        }),
+        .os_tag = .freestanding,
+        .abi = .gnuilp32,
+    };
 
     // Standard release options allow the person running `zig build` to select
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
-    const exe = b.addExecutable("tillitis-zig-test", "src/main.zig");
+    const exe = b.addExecutable("zig-riscv-test", "src/main.zig");
     exe.setTarget(target);
+    exe.setLinkerScriptPath(std.build.FileSource.relative("lib/tkey-libs/app.lds"));
     exe.setBuildMode(mode);
+    exe.addAssemblyFile("./lib/tkey-libs/libcrt0/crt0.S");
     exe.install();
 
     const run_cmd = exe.run();
