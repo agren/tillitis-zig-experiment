@@ -22,7 +22,7 @@ pub fn build(b: *std.build.Builder) void {
     // between Debug, ReleaseSafe, ReleaseFast, and ReleaseSmall.
     const mode = b.standardReleaseOptions();
 
-    const exe = b.addExecutable("zig-riscv-test", "src/main.zig");
+    const exe = b.addExecutable("tillitis-zig-experiment", "src/main.zig");
     exe.setTarget(target);
     exe.setLinkerScriptPath(std.build.FileSource.relative("lib/tkey-libs/app.lds"));
     exe.setBuildMode(mode);
