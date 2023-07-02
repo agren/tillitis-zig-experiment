@@ -1,15 +1,30 @@
 // zig fmt: off
 const MMIO_BASE       = 0xc0000000;
+const MMIO_TRNG_BASE  = MMIO_BASE;
 const MMIO_QEMU_BASE  = MMIO_BASE | 0x3e000000;
 const MMIO_TIMER_BASE = MMIO_BASE | 0x01000000;
 // zig fmt: on
 
+pub const trng = map_device_struct(Trng, MMIO_TRNG_BASE);
 pub const timer = map_device_struct(Timer, MMIO_TIMER_BASE);
 pub const qemu = map_device_struct(QEmu, MMIO_QEMU_BASE);
 
 fn map_device_struct(comptime T: type, base_address: u32) *volatile T {
     return @intToPtr(*volatile T, base_address);
 }
+
+const Trng = packed struct {
+    _unused_0: u288,
+    STATUS: u32,
+    _unused_1: u704,
+    ENTROPY: u32,
+
+    const STATUS_READY_BIT = 0;
+
+    pub fn entropy_is_ready(self: *volatile Trng) bool {
+        return self.STATUS & (1 << STATUS_READY_BIT) != 0;
+    }
+};
 
 const Timer = packed struct {
     _unused: u256,
