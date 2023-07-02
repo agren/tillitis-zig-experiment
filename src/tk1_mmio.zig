@@ -1,13 +1,41 @@
 // zig fmt: off
-const MMIO_BASE      = 0xc0000000;
-const MMIO_QEMU_BASE = MMIO_BASE | 0x3e000000;
+const MMIO_BASE       = 0xc0000000;
+const MMIO_QEMU_BASE  = MMIO_BASE | 0x3e000000;
+const MMIO_TIMER_BASE = MMIO_BASE | 0x01000000;
 // zig fmt: on
 
+pub const timer = map_device_struct(Timer, MMIO_TIMER_BASE);
 pub const qemu = map_device_struct(QEmu, MMIO_QEMU_BASE);
 
 fn map_device_struct(comptime T: type, base_address: u32) *volatile T {
     return @intToPtr(*volatile T, base_address);
 }
+
+const Timer = packed struct {
+    _unused: u256,
+    CTRL: u32,
+    STATUS: u32,
+    PRESCALER: u32,
+    TIMER: u32,
+
+    // zig fmt: off
+    const CTRL_START_BIT     = 0;
+    const CTRL_STOP_BIT      = 1;
+    const STATUS_RUNNING_BIT = 0;
+    // zig fmt: on
+
+    pub fn start(self: *volatile Timer) void {
+        self.CTRL = (1 << CTRL_START_BIT);
+    }
+
+    pub fn stop(self: *volatile Timer) void {
+        self.CTRL = (1 << CTRL_STOP_BIT);
+    }
+
+    pub fn is_running(self: *volatile Timer) bool {
+        return (self.STATUS & (1 << STATUS_RUNNING_BIT)) != 0;
+    }
+};
 
 const QEmu = packed struct {
     _unused: u32768,
