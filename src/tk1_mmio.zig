@@ -50,4 +50,19 @@ const QEmu = packed struct {
             self.putc(c);
         }
     }
+
+    fn hex_nibble(nibble: u4) u8 {
+        return switch (nibble) {
+            0...9 => @intCast(u8, nibble) + '0',
+            10...15 => @intCast(u8, nibble) - 10 + 'A',
+        };
+    }
+
+    pub fn puthexu32(self: *volatile QEmu, value: u32) void {
+        for ([_]u5{ 3, 2, 1, 0 }) |i| {
+            const byte_value = @truncate(u8, value >> (8 * i));
+            self.putc(hex_nibble(@truncate(u4, (byte_value >> 4))));
+            self.putc(hex_nibble(@truncate(u4, (byte_value))));
+        }
+    }
 };
