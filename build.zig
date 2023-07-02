@@ -27,6 +27,7 @@ pub fn build(b: *std.build.Builder) void {
     exe.setLinkerScriptPath(std.build.FileSource.relative("lib/tkey-libs/app.lds"));
     exe.setBuildMode(mode);
     exe.addAssemblyFile("./lib/tkey-libs/libcrt0/crt0.S");
+    _ = exe.installRaw("tillitis-zig-experiment.bin", .{});
     exe.install();
 
     const run_cmd = exe.run();
