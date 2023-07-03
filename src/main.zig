@@ -18,7 +18,7 @@ pub export fn main() void {
         mmio.qemu.puts("Hello world!\n");
 
         while (!mmio.trng.entropy_is_ready()) {}
-        mmio.qemu.puts("Enropy is: ");
+        mmio.qemu.puts("Entropy is: ");
         mmio.qemu.puthexu32(mmio.trng.ENTROPY);
         mmio.qemu.puts(".\n");
 
