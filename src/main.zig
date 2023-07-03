@@ -12,16 +12,21 @@ pub export fn main() void {
     mmio.timer.PRESCALER = 18000000; // 18000000: 1 sec/tick
 
     while (true) {
-        mmio.timer.TIMER = 1;
-        mmio.timer.start();
+        if (!mmio.timer.is_running()) {
+            mmio.timer.TIMER = 1;
+            mmio.timer.start();
 
-        mmio.qemu.puts("Hello world!\n");
+            mmio.qemu.puts("Hello world!\n");
 
-        while (!mmio.trng.entropy_is_ready()) {}
-        mmio.qemu.puts("Entropy is: ");
-        mmio.qemu.puthexu32(mmio.trng.ENTROPY);
-        mmio.qemu.puts(".\n");
+            while (!mmio.trng.entropy_is_ready()) {}
+            mmio.qemu.puts("Entropy is: ");
+            mmio.qemu.puthexu32(mmio.trng.ENTROPY);
+            mmio.qemu.puts(".\n\n");
+        }
 
-        while (mmio.timer.is_running()) {}
+        if (mmio.touch.got_event()) {
+            mmio.qemu.puts("Touch sensor touched.\n\n");
+            mmio.touch.clear_event();
+        }
     }
 }

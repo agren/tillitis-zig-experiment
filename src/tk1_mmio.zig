@@ -3,12 +3,14 @@ const MMIO_BASE       = 0xc0000000;
 const MMIO_TRNG_BASE  = MMIO_BASE;
 const MMIO_QEMU_BASE  = MMIO_BASE | 0x3e000000;
 const MMIO_TIMER_BASE = MMIO_BASE | 0x01000000;
+const MMIO_TOUCH_BASE = MMIO_BASE | 0x04000000;
 const MMIO_TK1_BASE   = MMIO_BASE | 0x3f000000;
 // zig fmt: on
 
 pub const tk1 = map_device_struct(Tk1, MMIO_TK1_BASE);
 pub const trng = map_device_struct(Trng, MMIO_TRNG_BASE);
 pub const timer = map_device_struct(Timer, MMIO_TIMER_BASE);
+pub const touch = map_device_struct(Touch, MMIO_TOUCH_BASE);
 pub const qemu = map_device_struct(QEmu, MMIO_QEMU_BASE);
 
 fn map_device_struct(comptime T: type, base_address: u32) *volatile T {
@@ -70,6 +72,23 @@ const Timer = packed struct {
 
     pub fn is_running(self: *volatile Timer) bool {
         return (self.STATUS & (1 << STATUS_RUNNING_BIT)) != 0;
+    }
+};
+
+const Touch = packed struct {
+    _unused: u288,
+    STATUS: u32,
+
+    // zig fmt: off
+    const STATUS_EVENT_BIT = 0;
+    // zig fmt: on
+
+    pub fn got_event(self: *volatile Touch) bool {
+        return (self.STATUS & (1 << STATUS_EVENT_BIT)) != 0;
+    }
+
+    pub fn clear_event(self: *volatile Touch) void {
+        self.STATUS = 0;
     }
 };
 
