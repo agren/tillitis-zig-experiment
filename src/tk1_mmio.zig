@@ -38,58 +38,47 @@ const Tk1 = packed struct {
 
 const Trng = packed struct {
     _unused_0: u288,
-    STATUS: u32,
+    STATUS: packed union {
+        word: u32,
+        fields: packed struct(u32) {
+            READY: bool,
+            _unused: u31,
+        },
+    },
     _unused_1: u704,
     ENTROPY: u32,
-
-    const STATUS_READY_BIT = 0;
-
-    pub fn entropy_is_ready(self: *volatile Trng) bool {
-        return self.STATUS & (1 << STATUS_READY_BIT) != 0;
-    }
 };
 
 const Timer = packed struct {
     _unused: u256,
-    CTRL: u32,
-    STATUS: u32,
+    CTRL: packed union {
+        word: u32,
+        fields: packed struct(u32) {
+            START: bool,
+            STOP: bool,
+            _unused: u30,
+        },
+    },
+    STATUS: packed union {
+        word: u32,
+        fields: packed struct(u32) {
+            RUNNING: bool,
+            _unused: u31,
+        },
+    },
     PRESCALER: u32,
     TIMER: u32,
-
-    // zig fmt: off
-    const CTRL_START_BIT     = 0;
-    const CTRL_STOP_BIT      = 1;
-    const STATUS_RUNNING_BIT = 0;
-    // zig fmt: on
-
-    pub fn start(self: *volatile Timer) void {
-        self.CTRL = (1 << CTRL_START_BIT);
-    }
-
-    pub fn stop(self: *volatile Timer) void {
-        self.CTRL = (1 << CTRL_STOP_BIT);
-    }
-
-    pub fn is_running(self: *volatile Timer) bool {
-        return (self.STATUS & (1 << STATUS_RUNNING_BIT)) != 0;
-    }
 };
 
 const Touch = packed struct {
     _unused: u288,
-    STATUS: u32,
-
-    // zig fmt: off
-    const STATUS_EVENT_BIT = 0;
-    // zig fmt: on
-
-    pub fn got_event(self: *volatile Touch) bool {
-        return (self.STATUS & (1 << STATUS_EVENT_BIT)) != 0;
-    }
-
-    pub fn clear_event(self: *volatile Touch) void {
-        self.STATUS = 0;
-    }
+    STATUS: packed union {
+        word: u32,
+        fields: packed struct(u32) {
+            EVENT: bool,
+            _unused: u31,
+        },
+    },
 };
 
 const QEmu = packed struct {
